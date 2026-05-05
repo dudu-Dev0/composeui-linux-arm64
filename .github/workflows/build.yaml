@@ -1,31 +1,33 @@
-name: build
+name: Build
+
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "trunk" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "trunk" ]
 
 jobs:
   build:
-    runs-on: macos-latest
+
+    runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: 21
+    - uses: actions/checkout@v4
+    - name: set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
 
-      - run: ./gradlew build
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew assembleRelease
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: app
+        path: build/bin/linuxArm64/debugExecutable/composeui-lightswitch.kexe
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: composeui-lightswitch-debug.kexe
-          path: build/bin/linuxArm64/debugExecutable/composeui-lightswitch.kexe
-          if-no-files-found: error
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: composeui-lightswitch-release.kexe
-          path: build/bin/linuxArm64/releaseExecutable/composeui-lightswitch.kexe
-          if-no-files-found: error
